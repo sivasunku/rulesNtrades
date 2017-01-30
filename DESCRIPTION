@@ -1,0 +1,15 @@
+Package: rulesNtrades
+Type: Package
+Title: Apply rules on equities
+Version: 0.1.0
+Author: Siva Sunku <siva.sunku@gmail.com>
+Maintainer: Siva Sunku <siva.sunku@gmail.com>
+Description: Helps in backtesting the given rules on an equity and gives the statistics on the results of applying the given rules.
+License: NA
+LazyData: TRUE
+RoxygenNote: 5.0.1
+Depends: dplyr,
+    xts,
+    FinancialInstrument,
+    quantmod,
+    lubridate
