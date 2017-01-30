@@ -1,0 +1,148 @@
+---
+title: "Adjusted HiLo Indicator"
+author: "Siva Sunku"
+date: "November 11, 2016"
+output: html_document
+---
+
+<!-- Input the Data building  --!>
+```{r block-1, include=FALSE}
+
+gSymbols <- symbols <- 'NIFTY'
+TestNum <- 'Scenario-VI'
+sampleRange <- "2007::2016"
+detailedPrint <- TRUE
+
+setwd("~/R/Analyze")
+source("code/makeFile.R")
+source("code/hma.R")
+source("code/trends.R")
+
+###
+data("NIFTYDly")
+data("NIFTYMin")
+dD <- NIFTYDly
+dH <- NIFTYHly
+dW <- NIFTYWkly
+colnames(dH) <- colnames(dD)
+
+d <- dD
+w <- dW
+tradesFile  <- paste("output/",gSymbols,"Trades",TestNum,".csv",sep="")
+tradesPrint <- paste("output/",gSymbols,"Trades",TestNum,".pdf",sep="")
+tradesRes   <- paste("output/",gSymbols,"Trades",TestNum,".html",sep="")
+```
+#Krausz Tripple Screen Indicator `r gSymbols`
+
+<!-- Indicators --!>
+#Averages
+```{r block-2, include=FALSE}
+#Constants for reference numbers
+hlNW   <- 3   #No. of weeks for Hi Lo Avg
+hmaLN  <- 8   #HMA average
+gTicks <- 4   #ticks for considering entry/exit, porosity
+gTxnFee <- (-1 * 0.0005)
+```
+
+<br>No. of weeks for HiLo Avg : **`r hlNW`**
+<br>No. of days  for hma  Avg : **`r hmaLN`**
+<br>No. of ticks for consideration : **`r gTicks`** 
+<br>Transaction Fee Percent **`r gTxnFee * 100`%**
+<br>Date Range of the test performed **`r sampleRange`**
+
+<!-- Capital Related Fields --!>
+#Capital Fields
+```{r block-3, include=FALSE}
+gCapital <- list( invFlag     = FALSE,   #Reinvest flag
+                  incrSlpFlag = TRUE,   #Incrase the slp according to trl Pct
+                  
+                  initQty     = 150,    #Initial Qty, default round((marginTimes * initCapital)/price)
+                  tradeQty    = 150,    #Tradeable quantity
+                  pbQty       = 75,     #Profit booking Quantity
+                  incrQty     = NA,     #How much Qty can be increased for
+                  maxQty      = NA,     #Maximum Qty trade allowed
+                  
+                  initCapital = 300000, #initial capital
+                  currCapital = NA,     #Currently available capital   
+                  incrCapital = NA,     #If this capital is procured, incrQty will be added to tradeQty
+                  stopCapital = NA,     #Stop trading if capital is reached below this threshold                  
+                  
+                  pbPct       = 6,      #Profit booking percent
+                  slpPct      = 1.5,    #Stop loss percent for capital
+                  trlPct      = 5,      #Percent after which slp is reset
+                  marginTimes = 4       #No. of times margin can be leveraged
+)
+temp <- t(t(gCapital))
+colnames(temp) <- c("Values")
+```
+<tr> `r kable(temp)`
+
+<!-- Create input, Sample the feed and backtest the same --!>
+```{r block-4, include= TRUE}
+#Create input, Sample out and backtest
+all     <-  hma.buildInput()
+sample  <- all[sampleRange]
+hma.backtest(sample)
+gStats <- trades.stat()
+```
+
+<!-- Print the Statistics --!>
+#Trade Statistics
+<tr> `r kable(gStats)`
+```{r block-5, include=FALSE}
+#Tabulate the profits by year vs qtr vs month
+temp <- aggregate(gTrades$netP,by = list(as.yearmon(as.Date(gTrades$entryTime))),FUN = sum)
+temp$Year  <- year(temp$Group.1)
+temp$Month <- lubridate::month(temp$Group.1,label=TRUE)
+temp$Qtr   <- quarter(temp$Group.1)
+
+#Tabulate the profits by openReason vs closeReason
+temp1 <- gTrades[,c("closeReason","openReason","netP","direction")]
+```
+
+```{r block-6,include=TRUE}
+#Year - Month  Profit
+xtabs(x~Year+Month,data=temp)
+
+#Year - Quarter Profit
+xtabs(x~Year+Qtr,data=temp)
+
+#Yearly profit
+xtabs(x~Year,data=temp)
+
+#Long Trades - CloseReason Vs OpenReason 
+xtabs(netP ~ openReason + temp1$direction ,data = temp1)
+
+#Long Trades - CloseReason Vs OpenReason 
+xtabs(netP ~ closeReason + openReason,data = temp1[temp1$direction == "LONG",])
+
+#Short Trades - CloseReason Vs OpenReason 
+xtabs(netP ~ closeReason + openReason,data = temp1[temp1$direction == "SHORT",])
+```
+
+<!-- Cumulative Sum of the profit & plot quartersly!-->
+#Equity Curve
+```{r block-curve, include = FALSE}
+temp <- aggregate(gTrades$netP,by = list(as.yearqtr(as.Date(gTrades$entryTime))),FUN = sum)
+temp$y <- cumsum(temp$x)
+temp$x <- NULL
+```
+
+```{r equity-curve,include=TRUE}
+plot(temp,type="l",xlab="Quarters",ylab="Profit")
+title("Equity Curve", sub = "Per Quarter",
+      cex.main = 2,   font.main= 3, col.main= "blue",
+      cex.sub = 0.75, font.sub = 3, col.sub = "red")
+```
+
+
+```{r block-graph,include=FALSE}
+if (detailedPrint == TRUE){
+  write.csv(gTrades,file = tradesFile)
+  hma.plot(sample,file = tradesPrint,by = "halfyear")
+  #All the trades are stored in the file 
+  tradesFile
+  #All the trades are graphed in the file 
+  tradesPrint
+}
+```
