@@ -3,31 +3,38 @@
 \name{statObject}
 \alias{statObject}
 \alias{stats.trades}
-\title{stats - Functions related to all stats - a trade is two transactions}
+\alias{tabulate.trades}
+\title{Statistics of all the trades}
 \usage{
 statObject()
 
 stats.trades(t)
+
+tabulate.trades(t)
 }
 \arguments{
-\item{t}{- trades table}
+\item{t}{- trades table. If t is provided, portfolio given will not be considered.}
 
-\item{n}{- no. of rows}
+\item{t}{- trades table. If t is provided, portfolio given will not be considered}
 }
 \value{
-trades dataframe
+list object
 
 numeric vector of drawdowns
+
+Returns a list object that contains Description & xtab object next to it
 }
 \description{
-stats - Functions related to all stats - a trade is two transactions
-
-- drawdown - is sum of sequence of all losing trades. netProfit is considered for calculating the same.
+All the statistics of trades executed in a given portfolio
 }
 \details{
-- This function returns a list of statistics object
+- statObject - returns the statistics object
 
-- This function gets the statistics of trades
+stats.trades - Calculates the statistics of a given trade table. 
+If t is null, trades in portfolio are considered for calculation
+
+tabulate.trades - Tabulates the trades according to year, month etc
+If t is null, trades in portfolio are considered for calculation
 }
 \note{
 
@@ -35,5 +42,5 @@ stats - Functions related to all stats - a trade is two transactions
 \author{
 Siva Sunku
 }
-\keyword{position}
+\keyword{stats}
 

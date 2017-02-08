@@ -1,26 +1,13 @@
-#' Onload package that gets executed whenever package is loaded.
+#' rules - Environment for executing rules N trades
 #' 
-#' @description - Defines the objects gTrades,gTrxns,gStats 
-#' the objects that are visible to this package
-#' 
-#' 
-#' constants
-#' 
-#' Constants used within this package. These are available only in this package
-#' 
+#' clean up all the rules environment and create a new environment
 #'
-
-
-zzz <- function(){
-  return (NULL)
+#' @author Siva Sunku
+#' @keywords rulesenvironment
+#' @note
+#' 
+.onLoad <- function(lib, pkg) {
+  if(!exists('.rules'))  {
+    .rules <<- new.env()
+  }
 }
-
-cacheEnv  <- new.env(hash = TRUE)
-
-
-.onAttach <- function(libname = find.package("myIndicators"), pkgname = "myIndicators") {
-  #Load the constants
-  data("sysdata",envir=environment())
-  
-}
-

@@ -1,15 +1,15 @@
-#'
-#' drawdowns - The sum of losing streaks in descending order
-#' @details  - This function gets the drawdowns in descending order
-#' @description  - drawdown - is sum of sequence of all losing trades. netProfit is considered for calculating the same.
-#' @param  t - sequence of numbers to find drawdown
-#' @return numeric vector of drawdowns
-#' @rdname  drawdowns
+#' Calculate the drawdowns in a series of profit
+#' 
+#' drawdowns - Returns the drawdowns from highest losing streak to lowest losing streak. Sums the sequence of losses & returns
+#' the same in descending order restricted by 'n' elements
+#' @param  t - sequence of numbers 
+#' @param  n - max number of drawdowns, default - 1
+#' @return vector
 #' @export
-drawdowns.trades <- function(t,n=1){
+drawdowns <- function(t,n=1){
   if ( !is.numeric(n) || (n<=0) ) { n <- 1 }
-  series <- as.numeric(t)
   
+  series <- as.numeric(t)
   len <- length(series)
   if (len ==0 ){return(0)}
   
