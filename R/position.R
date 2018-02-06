@@ -32,12 +32,12 @@ me <- list(
   closeQty = 0,
   closeReason = "None",
   #
-  trailPrice = 0,
-  slpPrice   = 0,
+  trailPrice = NA,
+  slpPrice   = NA,
   barCount   = 0,
   #profit booking
-  pbPrice    = 0,
-  pbLot      = 0,
+  pbPrice    = NA,
+  pbQty      = 0,
   pbCount    = 0
 )
 class(me) <- append( "position",class(me) )
