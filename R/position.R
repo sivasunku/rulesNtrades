@@ -32,13 +32,18 @@ me <- list(
   closeQty = 0,
   closeReason = "None",
   #
-  trailPrice = NA,
-  slpPrice   = NA,
-  barCount   = 0,
+  slpPrice   = NA,   #slpPrice created based on openPrice
+  
+  #
+  trailPrice = NA,    #Price when this is hit, trailSlpPrice is adjusted
+  trailSlpPrice = NA,
+
   #profit booking
   pbPrice    = NA,
   pbQty      = 0,
-  pbCount    = 0
+  pbCount    = 0,
+  
+  barCount   = 0
 )
 class(me) <- append( "position",class(me) )
 return(me)
