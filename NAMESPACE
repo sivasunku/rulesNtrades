@@ -37,3 +37,9 @@ export(tabulate.trades)
 export(tradeParms)
 export(trades)
 export(trxns)
+
+
+import(quantmod)
+import(fTrading)
+import(dplyr)
+import(lubridate)
