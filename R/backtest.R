@@ -95,7 +95,20 @@ calcLimits      <- function(pos,tradeParms,bar,...) {
 
   # For Long positions 
   if ( islong(pos) ) {
+    ## SLP
+    pos$slpPrice <- ifelse( t$pctFlag,
+                            pos$openPrice * (1 - (t$slpAmt/100) ) ,
+                            pos$openPrice - t$slpAmt )
+    pos$slpPrice <- round(pos$slpPrice,2)
     
+    ## PB
+    pos$pbPrice  <- ifelse( t$pctFlag,
+                            pos$openPrice * (1 + (t$pbAmt/100) )  ,
+                            pos$openPrice + t$pbAmt )
+    pos$pbPrice <- round(pos$pbPrice,2)
+    
+    
+  
     #Initial trailing Price os calculated based on the openPrice, subsequent once based on the existing trailingPrice.
     if ( is.na(pos$trailPrice)) {
       pos$trailPrice <- ifelse( t$pctFlag,
@@ -112,22 +125,27 @@ calcLimits      <- function(pos,tradeParms,bar,...) {
       }
     } #trailPrice End
     
+    pos$trailSlpPrice <- ifelse( t$pctFlag,
+                                 pos$trailPrice * (1 - (t$trlSlpAmt/100)),
+                                 pos$trailPrice - t$trlSlpAmt )
+    pos$trailSlpPrice <- round(pos$trailSlpPrice,digits = 2)
     
-    ## SLP
-    pos$slpPrice <- ifelse( t$pctFlag,
-                            pos$openPrice * (1 - (t$slpAmt/100) ) ,
-                            pos$openPrice - t$slpAmt )
-    pos$slpPrice <- round(pos$slpPrice,2)
-    
-    ## PB
-    pos$pbPrice  <- ifelse( t$pctFlag,
-                            pos$openPrice * (1 + (t$pbAmt/100) )  ,
-                            pos$openPrice + t$pbAmt )
-    pos$pbPrice <- round(pos$pbPrice,2)
   }
   
   # For Short positions set the trailing, slp & pb Prices
   if ( isshort(pos) ) {
+    ## SLP
+    pos$slpPrice <- ifelse( t$pctFlag,
+                            pos$openPrice * (1 + (t$slpAmt/100) ) ,
+                            pos$openPrice + t$slpAmt )
+    pos$slpPrice <- round(pos$slpPrice,2)
+    
+    ## PB
+    pos$pbPrice  <- ifelse( t$pctFlag,
+                            pos$openPrice * (1 - (t$pbAmt/100) )  ,
+                            pos$openPrice - t$pbAmt )
+    pos$pbPrice <- round(pos$pbPrice,2)
+    
     
     #Initial trailing Price os calculated based on the openPrice, subsequent once based on the existing trailingPrice.
     if ( is.na(pos$trailPrice)) {
@@ -145,17 +163,11 @@ calcLimits      <- function(pos,tradeParms,bar,...) {
       }
     } #trailPrice End
     
-    ## SLP
-    pos$slpPrice <- ifelse( t$pctFlag,
-                            pos$openPrice * (1 + (t$slpAmt/100) ) ,
-                            pos$openPrice + t$slpAmt )
-    pos$slpPrice <- round(pos$slpPrice,2)
-    
-    ## PB
-    pos$pbPrice  <- ifelse( t$pctFlag,
-                            pos$openPrice * (1 - (t$pbAmt/100) )  ,
-                            pos$openPrice - t$pbAmt )
-    pos$pbPrice <- round(pos$pbPrice,2)
+    pos$trailSlpPrice <- ifelse( t$pctFlag,
+                                 pos$trailPrice * (1 + (t$trlSlpAmt/100)),
+                                 pos$trailPrice + t$trlSlpAmt )
+    pos$trailSlpPrice <- round(pos$trailSlpPrice,digits = 2)
+
   } #End of Short position adjustments
   
   return(pos)
