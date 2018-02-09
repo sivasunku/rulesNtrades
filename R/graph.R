@@ -46,37 +46,54 @@ graph <- function(pf, prices, file, by = 'quarters',inTrades = NULL,overFun = NU
   }
   
   splitPrices  <- split.xts(prices,f = by, k=k)
-
+  
   #Make EntryExit table
   eXall <- .entryexit(inTrades,prices)
-
-  temp.plots <- vector(length(splitPrices),mode = 'list')
-  for (i in 1:length(splitPrices)) {
+  indexTZ(eXall) <- indexTZ(prices)
+  
+  pieces <- length(splitPrices)
+  temp.plots <- vector(pieces * 2,mode = 'list')
+  
+  p <- 0
+  i <- 1
+  for (i in 1:(pieces)){
     c  <- splitPrices[[i]]
     a  <- OHLC(splitPrices[[i]])
     ex <- eXall[index(c)]
-    chartSeries(c,type = 'bars')
     
+    #Draw the Longs
+    chartSeries(c,type = 'bars')
     if ( all( is.na(ex$lE) ) != TRUE ){
-      plot(addTA(ex$lE*a$High + width, on=1, type='p', pch=24, cex=2,col="blue", bg="blue"))
+      longE <- ex$lE*a$High + width
+      plot(addTA(longE, on=1, type='p', pch=24, cex=0.5,col="blue", bg="blue"))
     }
     if ( all( is.na(ex$lX) ) != TRUE ){
-      plot(addTA(ex$lX*a$High + width, on=1, type='p', pch=25, cex=2,col="blue", bg="blue"))
+      longX <- ex$lX*a$Low - width
+      plot(addTA(longX, on=1, type='p', pch=25, cex=0.5,col="blue", bg="blue"))
     }
-    
-    if ( all( is.na(ex$sE) ) != TRUE ){
-      plot(addTA(ex$sE*a$Low  - width, on=1, type='p', pch=24, cex=2,col="red",  bg="red"))
-    }
-    if ( all( is.na(ex$sX) ) != TRUE ){
-      plot(addTA(ex$sX*a$Low  - width, on=1, type='p', pch=25, cex=2,col="red",  bg="red"))
-    }
-
+    ## --- Insert the lines to be printed on graph ----
     if ( !missing(overFun) ){
-      environment(overFun) <- environment()
       overFun()
     }
+    p <- p + 1
+    temp.plots[[p]] <- recordPlot()
     
-    temp.plots[[i]] <- recordPlot()
+    #Draw the Shorts
+    chartSeries(c,type = 'bars')
+    if ( all( is.na(ex$sE) ) != TRUE ){
+      shortE <- ex$sE*a$High + width
+      plot(addTA(shortE, on=1, type='p', pch=24, cex=0.5,col="red",  bg="red"))
+    }
+    if ( all( is.na(ex$sX) ) != TRUE ){
+      shortX <- ex$sX*a$Low  - width
+      plot(addTA(shortX, on=1, type='p', pch=25, cex=0.5,col="red",  bg="red"))
+    }
+    ## --- Insert the lines to be printed on graph ----
+    if ( !missing(overFun) ){
+      overFun()
+    }
+    p <- p + 1
+    temp.plots[[p]] <- recordPlot()
   }
   
   #print to pdf

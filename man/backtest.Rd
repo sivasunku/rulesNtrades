@@ -4,7 +4,8 @@
 \alias{backtest}
 \title{backtest the given strategies & provide the}
 \usage{
-backtest(pf, dataset, parms, startat = 2, longE, longX, shortE, shortX, ...)
+backtest(pf, dataset, parms, startat = 2, longE, longX, shortE, shortX,
+  calcLimits = calcLimits, ...)
 }
 \arguments{
 \item{pf}{- portfolio to be tested}
@@ -23,21 +24,16 @@ backtest(pf, dataset, parms, startat = 2, longE, longX, shortE, shortX, ...)
 
 \item{shortX}{- A function that has conditions for short exit}
 
+\item{calcLimits}{- This is sample function given in this package, this can be overwritten by providing as parameter}
+
 \item{...}{- Can pass instrument names like instr & other things needed by longE,shortE functions etc.}
 }
 \value{
 portfolio name that has all the trades,transactions.
 }
 \description{
-All the rules that needs to be tested for evaluating a strategy. It initializes the trade table, trxn table.
-Requires 4 functions as default for executing longEntry,longExit, shortEntry & shortExit trades.
-Intra day conditions needs to be evaluated within the function code.
+backtest the given strategies & provide the
 }
 \note{
 
 }
-\author{
-Siva Sunku
-}
-\keyword{backtest}
-

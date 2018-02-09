@@ -18,4 +18,3 @@ vector
 drawdowns - Returns the drawdowns from highest losing streak to lowest losing streak. Sums the sequence of losses & returns
 the same in descending order restricted by 'n' elements
 }
-

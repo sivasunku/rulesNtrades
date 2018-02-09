@@ -43,4 +43,3 @@ If t is null, trades in portfolio are considered for calculation
 Siva Sunku
 }
 \keyword{stats}
-

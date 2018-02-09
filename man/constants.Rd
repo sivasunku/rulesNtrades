@@ -12,4 +12,3 @@ cBullishTrend
 All the constants required within the rulesNtrades package
 }
 \keyword{datasets}
-

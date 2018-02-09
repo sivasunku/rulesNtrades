@@ -7,7 +7,7 @@ Maintainer: Siva Sunku <siva.sunku@gmail.com>
 Description: Helps in backtesting the given rules on an equity and gives the statistics on the results of applying the given rules.
 License: NA
 LazyData: TRUE
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Depends: dplyr,
     xts,
     FinancialInstrument,

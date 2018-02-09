@@ -36,4 +36,3 @@ Capital gained can be utilized to increase the traded quantity according to the 
 Siva Sunku
 }
 \keyword{graph,plot}
-

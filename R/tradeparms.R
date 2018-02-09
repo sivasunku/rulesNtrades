@@ -21,9 +21,11 @@ tradeParms <- function(descr){
              
              
              pctFlag     = FALSE,  #This flag represent the Amounts mentioned are in Pct or static values. If True all pbAmt,slpAmt are static
+             
              #Parameters related to Profit booking
              pbFlag      = FALSE,  #If Profit booking to be taken, make it True
              pbAmt       = 1,      #Profit booking Amount(not in percent)
+             pbQty       = NA,     #No. of units to be booked if PB is hit
              
              #Parms related to stop loss
              slpFlag     = FALSE,  #If slp to be considered

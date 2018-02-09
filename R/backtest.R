@@ -1,6 +1,5 @@
 #' backtest the given strategies & provide the 
 #'
-c
 #' @note
 #' 
 #' @param pf - portfolio to be tested
@@ -36,7 +35,7 @@ backtest  <- function(pf,dataset,parms,startat = 2,
   for (i in 1:maxR){
     if ( isopen(pos) ){
       pos$barCount <- pos$barCount + 1
-      pos <- longX(pos,dataset,i,...)
+      pos <- longX(pos,parms,dataset,i,...)
       if ( isclosed(pos) ) {
         add.trxns.position(pf,pos,type = 'CLOSE')
         add.trades.position(pf,pos)
@@ -48,7 +47,7 @@ backtest  <- function(pf,dataset,parms,startat = 2,
       }
     }  
     
-    tempPos <- longE(dataset,i,...)
+    tempPos <- longE(parms,dataset,i,...)
     if ( (!isopen(pos)) && islong(tempPos) ){
       pos <- tempPos
       add.trxns.position(pf,tempPos,type = 'OPEN')
@@ -66,7 +65,7 @@ backtest  <- function(pf,dataset,parms,startat = 2,
   for (i in 1:maxR){
     if ( isopen(pos) ){
       pos$barCount <- pos$barCount + 1
-      pos <- shortX(pos,dataset,i,...)
+      pos <- shortX(pos,parms,dataset,i,...)
       if ( isclosed(pos) ) {
         add.trxns.position(pf,pos,type = 'CLOSE')
         add.trades.position(pf,pos)
@@ -78,7 +77,7 @@ backtest  <- function(pf,dataset,parms,startat = 2,
       }
     }  
     
-    tempPos <- shortE(dataset,i,...)
+    tempPos <- shortE(parms,dataset,i,...)
     if ( (!isopen(pos)) && isshort(tempPos) ){
       pos <- tempPos
       add.trxns.position(pf,tempPos,type = 'OPEN')
@@ -88,12 +87,17 @@ backtest  <- function(pf,dataset,parms,startat = 2,
   }
 }
 
-
+#' Calculate the price limits like slp, trailing slp, etc
 #' @export
 calcLimits      <- function(pos,tradeParms,bar,...) {
   t <- tradeParms
+  ##  --- Set the Variables ---------------------------------------------------------
+  Op <- as.numeric(bar$Open)
+  Hi <- as.numeric(bar$High)
+  Lo <- as.numeric(bar$Low)
+  Cl <- as.numeric(bar$Close)
 
-  # For Long positions 
+  ## --- For Long positions -------------------------------
   if ( islong(pos) ) {
     ## SLP
     pos$slpPrice <- ifelse( t$pctFlag,
@@ -117,7 +121,7 @@ calcLimits      <- function(pos,tradeParms,bar,...) {
       pos$trailPrice <- round(pos$trailPrice,digits = 2)
     } else {
       #This is to be trailed only if Price is hit by the candle.
-      if ( as.numeric(Hi(bar)) >= pos$trailPrice) {
+      if ( Hi >= pos$trailPrice) {
         temp <- ifelse( t$pctFlag,
                         pos$trailPrice * (1 + (t$trlAmt/100) ) , 
                         pos$trailPrice + t$trlAmt)
@@ -132,7 +136,7 @@ calcLimits      <- function(pos,tradeParms,bar,...) {
     
   }
   
-  # For Short positions set the trailing, slp & pb Prices
+  ## --- For Short positions -------------------------------
   if ( isshort(pos) ) {
     ## SLP
     pos$slpPrice <- ifelse( t$pctFlag,
@@ -155,7 +159,7 @@ calcLimits      <- function(pos,tradeParms,bar,...) {
       pos$trailPrice <- round(pos$trailPrice,digits = 2)
     } else {
       #This is to be trailed only if Price is hit by the candle.
-      if ( as.numeric(Lo(bar)) <= pos$trailPrice) {
+      if ( Lo <= pos$trailPrice) {
         temp <- ifelse( t$pctFlag,
                         pos$trailPrice * (1 - (t$trlAmt/100) ) , 
                         pos$trailPrice - t$trlAmt)
