@@ -24,9 +24,11 @@ portfolio <- function(pf = "default",n=1000,Fee = 0.05){
   p = new.env(hash = TRUE)
   p$trxnRow <- 1
   p$tradeRow <- 1
+  p$positionsRow <- 1
   p$trxnFee  <- Fee / 100
   p$trxns    <- trxns(n=n)
   p$trades   <- trades(n=n)
+  p$positions <- positions.table(n = n * 3)
   class(p) <- append("portfolio",class(p))
   assign(pf,p,envir = .rules)
   return(pf)

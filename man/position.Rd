@@ -15,6 +15,7 @@
 \alias{qty.position}
 \alias{+.position}
 \alias{-.position}
+\alias{get.positions.table}
 \title{position create an empty position Object}
 \usage{
 position(instr = "default")
@@ -44,14 +45,20 @@ qty(x)
 \method{+}{position}(posA, posB)
 
 \method{-}{position}(posA, posB)
+
+get.positions.table(pf = "default")
 }
 \arguments{
 \item{instr}{- instrument to be carried with position}
+
+\item{pf}{- default "default"}
 }
 \value{
 returns position object
 
 returns TRUE if position is opened, FALSE otherwise
+
+returns the positions for each and every execution
 }
 \description{
 A position object will store the details of trade opening, price, qty, closing etc. 
@@ -75,6 +82,8 @@ qty - Gives the quantity of a position, according to the direction of the positi
 "+" - Quantities are added & openprice is averaged
 
 "-" - only quantities are substracted
+
+get.positions.table
 }
 \note{
 
