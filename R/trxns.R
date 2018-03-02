@@ -65,7 +65,7 @@ add.trxns.position <- function (pf = "default",pos, type = c('OPEN','CLOSE') ) {
     ipf$trxns[n,]$date    <- pos$openDate
     ipf$trxns[n,]$price   <- pos$openPrice
     ipf$trxns[n,]$type    <- pos$direction
-    ipf$trxns[n,]$qty     <- qty(pos)
+    ipf$trxns[n,]$qty     <- pos$openQty
     ipf$trxns[n,]$fees    <- abs( qty(pos) ) * pos$openPrice * ipf$trxnFee
     ipf$trxnRow <- ipf$trxnRow + 1
   } #End of Open type
@@ -75,7 +75,7 @@ add.trxns.position <- function (pf = "default",pos, type = c('OPEN','CLOSE') ) {
     ipf$trxns[n,]$date    <- pos$closeDate
     ipf$trxns[n,]$price   <- pos$closePrice
     ipf$trxns[n,]$type    <- ifelse(pos$direction == "LONG","SHORT","LONG")
-    ipf$trxns[n,]$qty     <- -1 * qty(pos)
+    ipf$trxns[n,]$qty     <- pos$closeQty
     ipf$trxns[n,]$fees    <- abs(pos$closeQty) * pos$openPrice * ipf$trxnFee
     ipf$trxnRow <- ipf$trxnRow + 1
   } #End of close type

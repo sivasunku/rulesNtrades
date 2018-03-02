@@ -16,6 +16,8 @@
 \alias{+.position}
 \alias{-.position}
 \alias{get.positions.table}
+\alias{get.positions.id}
+\alias{incr.positions.id}
 \title{position create an empty position Object}
 \usage{
 position(instr = "default")
@@ -47,9 +49,17 @@ qty(x)
 \method{-}{position}(posA, posB)
 
 get.positions.table(pf = "default")
+
+get.positions.id(pf = "default")
+
+incr.positions.id(pf = "default")
 }
 \arguments{
 \item{instr}{- instrument to be carried with position}
+
+\item{pf}{- default "default"}
+
+\item{pf}{- default "default"}
 
 \item{pf}{- default "default"}
 }
@@ -59,6 +69,10 @@ returns position object
 returns TRUE if position is opened, FALSE otherwise
 
 returns the positions for each and every execution
+
+returns the position id that is created currently. This is a global variable at portfolio level.
+
+returns the position id that is created currently. Increments the old id by 1
 }
 \description{
 A position object will store the details of trade opening, price, qty, closing etc. 
@@ -84,6 +98,10 @@ qty - Gives the quantity of a position, according to the direction of the positi
 "-" - only quantities are substracted
 
 get.positions.table
+
+get.positions.id
+
+incr.positions.id
 }
 \note{
 

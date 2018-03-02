@@ -18,6 +18,7 @@ me <- list(
   symbol = instr,
   direction = NULL,
   justOpened = FALSE,
+  id = 001,
   
   openFlag = FALSE,
   openDate = as.POSIXct("1950-01-01"),
@@ -36,6 +37,7 @@ me <- list(
   
   #
   trailPrice = NA,    #Price when this is hit, trailSlpPrice is adjusted
+  trailTrigFlag = FALSE,
   trailSlpPrice = NA,
 
   #profit booking
@@ -196,6 +198,7 @@ positions.table <- function(n = 1000){
                   symbols = character(n),
                   direction = character(n),
                   justOpened = logical(n),
+                  id         = double(n),
                   
                   openFlag   = logical(n),
                   openDate   = as.POSIXct("1950-01-01"),
@@ -213,6 +216,7 @@ positions.table <- function(n = 1000){
                   slpPrice    = double(n),
                   trailPrice  = double(n),
                   trailSlpPrice = double(n),
+                  trailTrigFlag = logical(n),
                   pbPrice = double(n),
                   
                   pbQty   = double(n),
@@ -258,6 +262,7 @@ add.table.positions <- function (pf = "default", bar, pos){
   ipf$positions[n,]$symbols    <- pos$symbol
   ipf$positions[n,]$direction  <- ifelse(is.null(pos$direction),NA,pos$direction)
   ipf$positions[n,]$justOpened <- pos$justOpened
+  ipf$positions[n,]$id         <- pos$id
   
   ipf$positions[n,]$openFlag   <- pos$openFlag
   ipf$positions[n,]$openDate   <- pos$openDate
@@ -275,6 +280,7 @@ add.table.positions <- function (pf = "default", bar, pos){
   ipf$positions[n,]$slpPrice        <- pos$slpPrice
   ipf$positions[n,]$trailPrice      <- pos$trailPrice
   ipf$positions[n,]$trailSlpPrice   <- pos$trailSlpPrice
+  ipf$positions[n,]$trailTrigFlag   <- pos$trailTrigFlag
   ipf$positions[n,]$pbPrice         <- pos$pbPrice
   ipf$positions[n,]$pbQty           <- pos$pbQty
   ipf$positions[n,]$pbCount         <- pos$pbCount
@@ -296,4 +302,32 @@ get.positions.table <- function( pf = "default"){
   }
   ipf <- get(pf,envir = .rules)
   return( ipf$positions[1:(ipf$positionsRow-1),] )
+}
+
+#' @details get.positions.id
+#' @param pf - default "default"
+#' @return returns the position id that is created currently. This is a global variable at portfolio level.
+#' @rdname position
+#' @export
+get.positions.id <- function( pf = "default"){
+  if ( !is.valid.portfolio(pf) ) {
+    stop("get.positions.table - portfolio is not a valid portfolio. Create one using portfolio before using the same.")
+  }
+  ipf <- get(pf,envir = .rules)
+  return( ipf$positionId )
+}
+
+
+#' @details incr.positions.id
+#' @param pf - default "default"
+#' @return returns the position id that is created currently. Increments the old id by 1
+#' @rdname position
+#' @export
+incr.positions.id <- function( pf = "default"){
+  if ( !is.valid.portfolio(pf) ) {
+    stop("get.positions.table - portfolio is not a valid portfolio. Create one using portfolio before using the same.")
+  }
+  ipf <- get(pf,envir = .rules)
+  ipf$positionId <- ipf$positionId + 1
+  return( ipf$p$positionId )
 }

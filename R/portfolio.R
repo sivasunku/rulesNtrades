@@ -25,6 +25,7 @@ portfolio <- function(pf = "default",n=1000,Fee = 0.05){
   p$trxnRow <- 1
   p$tradeRow <- 1
   p$positionsRow <- 1
+  p$positionId <- 1
   p$trxnFee  <- Fee / 100
   p$trxns    <- trxns(n=n)
   p$trades   <- trades(n=n)
