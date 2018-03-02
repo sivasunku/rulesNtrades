@@ -4,8 +4,8 @@
 \alias{graph}
 \title{graph - plot the graph into a given pdf}
 \usage{
-graph(pf, prices, file, by = "quarters", inTrades = NULL, overFun = NULL,
-  ...)
+graph(pf, prices, file = NULL, by = "quarters", parms = NULL,
+  inTrades = NULL, inPositions = NULL, overFun = NULL, ...)
 }
 \arguments{
 \item{pf}{- portfolio which needs to be graphed}
@@ -21,6 +21,8 @@ All values accepted by endpoints function are available + halfyear. default - qu
 \item{inTrades}{- if given only these trades are graphed. portfolio is ignored.}
 
 \item{overFun}{- overFun is a overlay function that helps to overlay graph wiht any of the indicators or values.}
+
+\item{inpositions}{- positions table for every day}
 }
 \description{
 This will plot the OHLC bars & corresponding trades performed.

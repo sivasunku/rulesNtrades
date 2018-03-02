@@ -15,15 +15,24 @@
 #' @param  by        - frequncy for each page (whether monthly, weekly, quarterly) etc. 
 #' e.g. monthly makes each page of pdf to contain one months data. 
 #' All values accepted by endpoints function are available + halfyear. default - quarters.
+#' @parms = tra
 #' @param  file      - filename where pdf to be stored. Please be advised, it will overwrite if any file exists.
 #' @param  inTrades  - if given only these trades are graphed. portfolio is ignored.
+#' @param  inpositions - positions table for every day
 #' @param  overFun   - overFun is a overlay function that helps to overlay graph wiht any of the indicators or values. 
 #' @details overFun - is a function supplied by user. This is executed in the graph function environment, so all the variables
 #' available for the graph function can be used by overFun. However caution to be exercised not to stop the function abruptly
 #' @rdname graph
 #' @export
 #' 
-graph <- function(pf, prices, file, by = 'quarters',inTrades = NULL,overFun = NULL,...) {
+graph <- function(pf, 
+                  prices, 
+                  file = NULL, 
+                  by = 'quarters',
+                  parms = NULL,
+                  inTrades = NULL,
+                  inPositions = NULL,
+                  overFun = NULL,...) {
   
   width <- 5
   if ( !is.valid.portfolio(pf) ) {
@@ -32,7 +41,10 @@ graph <- function(pf, prices, file, by = 'quarters',inTrades = NULL,overFun = NU
   if ( missing(inTrades) ){
     inTrades <- get.trades(pf)
   }
-  if (file.exists(file)) { 
+  if ( missing(inPositions)){
+    inPositions <- get.positions.table(pf)
+  }
+  if (!is.null(file) && file.exists(file)) { 
     msg <- paste( "File", file, " Exists already. It is overwritten",sep="")
     warnings(msg)
   }
@@ -51,8 +63,19 @@ graph <- function(pf, prices, file, by = 'quarters',inTrades = NULL,overFun = NU
   eXall <- .entryexit(inTrades,prices)
   indexTZ(eXall) <- indexTZ(prices)
   
+  #Add columns if not present
+  cnames <- colnames(eXall)
+  if (!("lE" %in% cnames) ) {eXall$lE <- NA}
+  if (!("lX" %in% cnames) ) {eXall$lX <- NA}
+  if (!("sE" %in% cnames) ) {eXall$sE <- NA}
+  if (!("sX" %in% cnames) ) {eXall$sX <- NA}
+  
+  
+  #Make the slp/pb price table
+  pbPrices <- .makePBtable(inPositions,parms)
+  
   pieces <- length(splitPrices)
-  temp.plots <- vector(pieces * 2,mode = 'list')
+  temp.plots <- vector(pieces,mode = 'list')
   
   p <- 0
   i <- 1
@@ -60,55 +83,53 @@ graph <- function(pf, prices, file, by = 'quarters',inTrades = NULL,overFun = NU
     c  <- splitPrices[[i]]
     a  <- OHLC(splitPrices[[i]])
     ex <- eXall[index(c)]
+    pb <- pbPrices[index(c)]
     
     #Draw the Longs
     chartSeries(c,type = 'bars')
-    if ( all( is.na(ex$lE) ) != TRUE ){
-      longE <- ex$lE*a$High + width
-      plot(addTA(longE, on=1, type='p', pch=24, cex=0.5,col="blue", bg="blue"))
-    }
-    if ( all( is.na(ex$lX) ) != TRUE ){
-      longX <- ex$lX*a$Low - width
-      plot(addTA(longX, on=1, type='p', pch=25, cex=0.5,col="blue", bg="blue"))
-    }
-    ## --- Insert the lines to be printed on graph ----
-    if ( !missing(overFun) ){
-      overFun()
-    }
-    p <- p + 1
-    temp.plots[[p]] <- recordPlot()
     
-    #Draw the Shorts
-    chartSeries(c,type = 'bars')
-    if ( all( is.na(ex$sE) ) != TRUE ){
-      shortE <- ex$sE*a$High + width
-      plot(addTA(shortE, on=1, type='p', pch=24, cex=0.5,col="red",  bg="red"))
+    if ( (all( is.na(ex) ) != TRUE) ) {
+      ex$lE  <- ex$lE * 40
+      ex$lX  <- ex$lX * 30
+      ex$sE  <- ex$sE * 20
+      ex$sX  <- ex$sX * 10
+      #ex[is.na(ex)] <- 0
+      #plot(addTA(shortE, on=1, type='p', pch=24, cex=0.5,col="red",  bg="red"))
+      
+      #plot the buy/sell trades
+      plot(addTA( ex,
+                  pch = c(24,25,24,25),
+                  col = c("blue","blue","red","red"),
+                  bg  = c("blue","blue","red","red"),
+                  cex = c(1,1,1,1),
+                  type = c('p','p','p','p')
+      ) )
     }
-    if ( all( is.na(ex$sX) ) != TRUE ){
-      shortX <- ex$sX*a$Low  - width
-      plot(addTA(shortX, on=1, type='p', pch=25, cex=0.5,col="red",  bg="red"))
-    }
-    ## --- Insert the lines to be printed on graph ----
-    if ( !missing(overFun) ){
-      overFun()
-    }
-    p <- p + 1
-    temp.plots[[p]] <- recordPlot()
+    plot(addTA(res[,c("bullFlow","bearFlow")],col=c("green","red")))
+    
+    #plot the PB price, trail price etc
+    plot(addTA(pb[,c("pbPrice","slpPrice","trailSlpPrice","trailPrice")],
+               col = c("green","red","blue","orange"),
+               type = c('o','o','o','o')
+               #on = 3
+    ))
+    temp.plots[[i]] <- recordPlot()
   }
   
   #print to pdf
-  pdf(file,onefile = TRUE)
-  for(i in temp.plots){
-    replayPlot(i)
-  }
-  graphics.off()
+  if ( !is.null(file) ) {
+    pdf(file,onefile = TRUE)
+    for(i in temp.plots){
+      replayPlot(i)
+    }
+    graphics.off()
+  } 
   
 } #end of function graph
 
-
 #' @details .entryexit - internal function to return 4 columns with '1' in corresponding rows where trade is done.
 #' @param  t - trades
-#' @param  p - prices,OHLC
+#' @param  p - tradeparms
 #' @return returns xts which has 4 columns - lE,lX,sE,sX longEntry,longExit,shortEntry,shortExit etc
 #'
 .entryexit <- function(t,p){
@@ -141,6 +162,24 @@ graph <- function(pf, prices, file, by = 'quarters',inTrades = NULL,overFun = NU
     sX <- merge(sX,sX = 1)
     res <- merge.xts(res,sE,sX)
   }
+  
+  return(res)
+}
+
+#' @details .makePBtable - internal function to return profit booking,slp, trailing prices
+#' @param  p - trades
+#' @param parms - tradeparms
+#' @return returns xts which has 4 columns - lE,lX,sE,sX longEntry,longExit,shortEntry,shortExit etc
+#'
+.makePBtable <- function(p,parms){
+  temp <- p[c("onDate","pbPrice","slpPrice","trailPrice","trailSlpPrice")]
+  if (anyDuplicated(temp$onDate) > 0){
+    stop("in makePBtable index is duplicated")
+  }
+  res <- xts(x = temp[,2:5],order.by = temp[,1])
+  if (parms$pbFlag == FALSE)     {  res$pbPrice <- NA  }
+  if (parms$slpFlag == FALSE)    {  res$slpPrice <- NA }
+  if (parms$trlFlag == FALSE)    {  res$trailPrice <- res$trailSlpPrice <- NA }
   
   return(res)
 }
