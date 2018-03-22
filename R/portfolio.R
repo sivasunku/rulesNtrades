@@ -35,11 +35,11 @@ portfolio <- function(pf = "default",n=1000,Fee = 0.05){
   return(pf)
 }
 
-#' @details is.portfolio - will return if a portfolio exists of that name & checks if given object is portfolio/not
-#' @return  is.portfolio - checks if the given name is a portfolio or not
+#' @details is.rules.portfolio - will return if a portfolio exists of that name & checks if given object is portfolio/not
+#' @return  is.rules.portfolio - checks if the given name is a portfolio or not
 #' @rdname  portfolio
 #' @export
-is.portfolio <- function(pf){
+is.rules.portfolio <- function(pf){
   temp <- get(pf,envir = .rules)
   return ( inherits(temp,"portfolio") )
 }
@@ -49,7 +49,7 @@ is.portfolio <- function(pf){
 #' @rdname portfolio
 #' @export
 is.valid.portfolio <- function(pf="default"){
-  if( exists(pf, envir=.rules,inherits=TRUE) && is.portfolio(pf) ){
+  if( exists(pf, envir=.rules,inherits=TRUE) && is.rules.portfolio(pf) ){
     return(TRUE)
   }
   return(FALSE)
@@ -64,7 +64,7 @@ delete.portfolio <- function(pf = "default"){
     s <- sprintf("delete.portfolio - could not find the portfolio %s",pf)
     stop(s)
   }
-  evalq(rm( list = ls()),envir = .rules)
+  evalq(rm( list = pf,envir = .rules))
 }
 
 #' @details update.portfolio - will update any value inside a portfolio. 
@@ -92,4 +92,13 @@ set.fee.portfolio <- function(pf = "default",Fee = 0.05){
   ipf <- get(pf,envir = .rules)
   ipf$trxnFee <- Fee / 100
   return (ipf$trxnFee)
+}
+
+
+#' @return Clean all the portfolios - both blotter & .rules
+#' @export
+clean.all.portfolios <- function(){
+  if ( is.environment(.blotter) )   { rm(list = ls(envir = .blotter) ,envir = .blotter)   }
+  if ( is.environment(.strategy) )  { rm(list = ls(envir = .strategy),envir = .strategy)  }
+  if ( is.environment(.rules) )     { rm(list = ls(envir = .rules),   envir = .rules)     }
 }

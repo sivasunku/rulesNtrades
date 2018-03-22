@@ -1,5 +1,5 @@
 #' backtest the given strategies & provide the 
-#'
+#'  The difference between backtest & backtestV2 is , former technicallu loops all shorts/longs in one for loop. V2 - in different for loops.
 #' @note
 #' 
 #' @param pf - portfolio to be tested
@@ -31,112 +31,71 @@ backtest  <- function(pf,dataset,parms,startat = 2,
   instr <- ifelse(is.null(dots$instr),"default",dots$instr)
   
   ## --- Long Positions Check --------------------------------------------------
-  if (parms$longTrades) {
-    pos <- position(instr)
-    doAct <- TRUE
-    for (i in 1:maxR){
-      actFlag <- FALSE
-      if ( isopen(pos) ){
-        pos$barCount <- pos$barCount + 1
-        pos <- longX(pos,parms,dataset,i,...)
-        add.table.positions(pf,bar = dataset[i,],pos)
-        
-        ## ---- If position is closed, check if it is for Profit booking ----
-        if ( isclosed(pos) ) {
-          add.trxns.position(pf,pos,type = 'CLOSE')
-          add.trades.position(pf,pos)
-          
-          pos$openQty   <- pos$openQty - pos$closeQty
-          #Create new dummy position if position becomes complete zero
-          if ( pos$openQty == 0) {
-            pos$closeFlag <- TRUE
-            pos <- position(instr)
-            actFlag <- TRUE
-          } else {
-            pos$closeFlag <- FALSE
-            pos$closeQty <- 0
-            pos$closeReason <- "None"
-          }
-        }
-      }  
-      
-      #If same day new positions can be taken or not.
-      if ( parms$sameDayFlag == FALSE ) {
-        doAct <- ifelse(actFlag,FALSE,TRUE)
-      }
-      
-      tempPos <- longE(parms,dataset,i,...)
-      if ( (!isopen(pos)) && islong(tempPos) && (doAct) ){
-        pos <- tempPos
-        #Increase the id when position is created
-        incr.positions.id(pf)
-        pos$id <- get.positions.id(pf)
-        #if(pos$id >=3) {browser()}
-        add.trxns.position(pf,tempPos,type = 'OPEN')
-      }
-      
-      # if ( islong(pos) && islong(tempPos) && (tradeParms$pyramidFlag == TRUE) ){
-      #   pod <- pos + tempPos
-      #   add.trxns.position(pf,tempPos,type = 'OPEN')
-      # }
-      pos <- calcLimits(pos,parms,dataset,i)
-    } #End of Long positions For loop
-  }
-  
-  ## --- Short Positions Check --------------------------------------------------
-  if (parms$shortTrades) {
-    pos <- position(instr)
-    doAct <- TRUE
-    for (i in 1:maxR){
-      actFlag <- FALSE
-      if ( isopen(pos) ){
-        pos$barCount <- pos$barCount + 1
+  pos <- position(instr)
+  doAct <- TRUE
+  for (i in 1:maxR){
+    actFlag <- FALSE
+    ### ------ Check Exits and conds-------------------------------------------
+    if ( isopen(pos) ){
+      pos$barCount <- pos$barCount + 1
+      ## ---- Check for Exit --------------------------------------------------
+      if( isshort(pos) ){
         pos <- shortX(pos,parms,dataset,i,...)
-        add.table.positions(pf,bar = dataset[i,],pos)
+      } else {
+        pos <-  longX(pos,parms,dataset,i,...)
+      }
+      add.table.positions(pf,bar = dataset[i,],pos)
+      ## ---- Check if Closed or profit booking -----------------------------
+      if ( isclosed(pos) ) {
+        add.trxns.position(pf,pos,type = 'CLOSE')
+        add.trades.position(pf,pos)
         
-        ## ---- If position is closed, check if it is for Profit booking ----
-        if ( isclosed(pos) ) {
-          add.trxns.position(pf,pos,type = 'CLOSE')
-          add.trades.position(pf,pos)
-          
-          pos$openQty   <- pos$openQty - pos$closeQty
-          #Create new dummy position if position becomes complete zero
-          if ( pos$openQty == 0) {
-            pos$closeFlag <- TRUE
-            pos <- position(instr)
-            actFlag <- TRUE
-          } else {
-            pos$closeFlag <- FALSE
-            pos$closeQty <- 0
-            pos$closeReason <- "None"
-          }
+        pos$openQty   <- pos$openQty - pos$closeQty
+        #Create new dummy position if position becomes complete zero
+        if ( pos$openQty == 0) {
+          pos$closeFlag <- TRUE
+          pos <- position(instr)
+          actFlag <- TRUE
+        } else {
+          pos$closeFlag <- FALSE
+          pos$closeQty <- 0
+          pos$closeReason <- "None"
         }
-      }  
-      
-      #If same day new positions can be taken or not.
-      if ( parms$sameDayFlag == FALSE ) {
-        doAct <- ifelse(actFlag,FALSE,TRUE)
       }
-      if (as.Date(index(dataset[i,])) >= "2022-02-15") {browser()}
-      tempPos <- shortE(parms,dataset,i,...)
-      if ( (!isopen(pos)) && isshort(tempPos) && (doAct) ){
-        pos <- tempPos
-        #Increase the id when position is created
-        incr.positions.id(pf)
-        pos$id <- get.positions.id(pf)
-        #if(pos$id >=3) {browser()}
-        add.trxns.position(pf,tempPos,type = 'OPEN')
-      }
-      
-      # if ( islong(pos) && islong(tempPos) && (tradeParms$pyramidFlag == TRUE) ){
-      #   pod <- pos + tempPos
-      #   add.trxns.position(pf,tempPos,type = 'OPEN')
-      # }
-      pos <- calcLimits(pos,parms,dataset,i)
-      #print(sprintf("Bar index: %s, pb: %f",index(dataset[i,]),pos$pbPrice))
-    } #End of Long positions For loop
-  }
+    }
+    
+    #If same day new positions can be taken or not.
+    if ( parms$sameDayFlag == FALSE ) {
+      doAct <- ifelse(actFlag,FALSE,TRUE)
+    }
+    
+    ### ------ OPEN the position -----------------------------------------------
+    tempPos <- longE(parms,dataset,i,...)
+    if ( (!isopen(pos)) && islong(tempPos) && (doAct) && (parms$longTrades) ){
+      pos <- tempPos
+      #Increase the id when position is created
+      incr.positions.id(pf)
+      pos$id <- get.positions.id(pf)
+      #if(pos$id >=3) {browser()}
+      add.trxns.position(pf,tempPos,type = 'OPEN')
+    }
+    tempPos <- shortE(parms,dataset,i,...)
+    if ( (!isopen(pos)) && isshort(tempPos) && (doAct) && (parms$shortTrades) ){
+      pos <- tempPos
+      #Increase the id when position is created
+      incr.positions.id(pf)
+      pos$id <- get.positions.id(pf)
+      #if(pos$id >=3) {browser()}
+      add.trxns.position(pf,tempPos,type = 'OPEN')
+    }
+    
+    ### ------ Calculate the limits---------------------------------------------
+    pos <- calcLimits(pos,parms,dataset,i)
+  } #End of Long positions For loop
   
+  ## ---- Return Code --------------------------------------------------------------
+  return(pf) 
 }
+
 
 

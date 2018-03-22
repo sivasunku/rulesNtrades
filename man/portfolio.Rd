@@ -2,7 +2,7 @@
 % Please edit documentation in R/portfolio.R
 \name{portfolio}
 \alias{portfolio}
-\alias{is.portfolio}
+\alias{is.rules.portfolio}
 \alias{is.valid.portfolio}
 \alias{delete.portfolio}
 \alias{update.portfolio}
@@ -11,7 +11,7 @@
 \usage{
 portfolio(pf = "default", n = 1000, Fee = 0.05)
 
-is.portfolio(pf)
+is.rules.portfolio(pf)
 
 is.valid.portfolio(pf = "default")
 
@@ -33,7 +33,7 @@ set.fee.portfolio(pf = "default", Fee = 0.05)
 \value{
 portfolio - returns name of the portfolio
 
-is.portfolio - checks if the given name is a portfolio or not
+is.rules.portfolio - checks if the given name is a portfolio or not
 
 is.valid.portfolio - Returns TRUE/FALSE
 
@@ -49,7 +49,7 @@ initportfolio & getportfolio defaults the portfolio and retrieves the working en
 \details{
 portfolio - will initialize all the objects required for building the portfolio
 
-is.portfolio - will return if a portfolio exists of that name & checks if given object is portfolio/not
+is.rules.portfolio - will return if a portfolio exists of that name & checks if given object is portfolio/not
 
 is.valid.portfolio - will return if a portfolio exists of that name
 

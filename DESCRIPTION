@@ -12,4 +12,7 @@ Depends: dplyr,
     xts,
     FinancialInstrument,
     quantmod,
+    quantstrat,
+    blotter,
+    PerformanceAnalytics,
     lubridate
